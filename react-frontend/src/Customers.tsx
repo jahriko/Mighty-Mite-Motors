@@ -579,42 +579,6 @@ export default function Customer() {
 				onHide={hideDialog}
 			>
 				<Form customer={customer} submitted={true} />
-				{/* <div className="field">
-					<label htmlFor="name" className="font-bold">
-						Customer Name
-					</label>
-					<InputText
-						id="customer_name"
-						value={customer.customer_name}
-						onChange={(e) => onInputChange(e, "customer_name")}
-						required
-						autoFocus
-						className={classNames({
-							"p-invalid": submitted && !customer.customer_name,
-						})}
-					/>
-					{submitted && !customer.customer_name && (
-						<small className="p-error">Name is required.</small>
-					)}
-				</div>
-				<div className="field">
-					<label htmlFor="um" className="font-bold">
-						City
-					</label>
-					<InputText
-						id="customer_city"
-						value={customer.customer_city}
-						onChange={(e) => onInputChange(e, "customer_city")}
-						required
-						autoFocus
-						className={classNames({
-							"p-invalid": submitted && !customer.customer_city,
-						})}
-					/>
-					{submitted && !customer.customer_city && (
-						<small className="p-error">City is required.</small>
-					)}
-				</div> */}
 			</Dialog>
 		</div>
 	);
