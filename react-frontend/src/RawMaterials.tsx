@@ -133,6 +133,38 @@ export default function RawMaterial() {
 		setRawMaterial(_rawMaterial);
 	};
 
+	async function createRecord(record: RawMaterial) {
+		try {
+			const res = fetch(
+				"https://localhost/db_final_project/create.php?endpoint=create-raw-material",
+				{
+					method: "POST",
+					body: JSON.stringify(record),
+				}
+			);
+			res.then((res) => {
+				if (res.status === 200) {
+					toast.current.show({
+						severity: "success",
+						summary: "Successful",
+						detail: "Record Created Successfully",
+						life: 3000,
+					});
+				} else {
+					toast.current.show({
+						severity: "error",
+						summary: "Error",
+						detail: "Record Create Error",
+						life: 3000,
+					});
+				}
+			});
+		} catch (error) {
+			console.error("Error creating record:", error);
+			alert("Failed to create record");
+		}
+	}
+
 	async function updateRecord(record: RawMaterial) {
 		try {
 			const res = await fetch(
@@ -270,6 +302,7 @@ export default function RawMaterial() {
 				updateRecord(_rawMaterials[index]);
 			} else {
 				_rawMaterials.push(_rawMaterial);
+				createRecord(_rawMaterial);
 				toast.current.show({
 					severity: "success",
 					summary: "Successful",
@@ -442,13 +475,13 @@ export default function RawMaterial() {
 					)}
 				</div>
 				<div className="field col">
-					<label htmlFor="quantity" className="font-bold">
+					<label htmlFor="quantity_in_stock" className="font-bold">
 						Quantity In Stock
 					</label>
 					<InputNumber
 						id="quantity"
 						value={rawMaterial.quantity_in_stock}
-						onValueChange={(e) => onInputNumberChange(e, "quantity")}
+						onValueChange={(e) => onInputNumberChange(e, "quantity_in_stock")}
 					/>
 				</div>
 				<div className="field col">

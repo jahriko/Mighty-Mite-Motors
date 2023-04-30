@@ -1,16 +1,18 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import RawMaterials from "./RawMaterials";
+import Customers from "./Customers";
 
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Dashboard = () => <div>Dashboard</div>;
 // const RawMaterials = () => <div>Raw Materials</div>;
 const Orders = () => <div>Orders</div>;
-const Customers = () => <div>Customers</div>;
+// const Customers = () => <div>Customers</div>;
 const Suppliers = () => <div>Suppliers</div>;
 
 const App = () => {

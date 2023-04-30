@@ -25,10 +25,6 @@ switch ($endpoint) {
     case 'suppliers':
         getSuppliers($conn);
         break;
-    case 'update-raw-material':
-        updateRawMaterial($conn);
-        break;
-    // Add more cases for each table and related API functions
     default:
         echo json_encode(['message' => 'Invalid API endpoint']);
         break;
@@ -93,8 +89,6 @@ function getSuppliers($conn)
     }
     echo json_encode($suppliers);
 }
-
-// Add more functions to handle other tables and related API operations
 
 $conn->close();
 ?>
