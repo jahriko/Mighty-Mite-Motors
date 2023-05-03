@@ -14,7 +14,7 @@ import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { Divider } from "primereact/divider";
-// TODO: Add Orders each customer
+
 type Customer = {
 	customer_numb?: number;
 	customer_name: string;
@@ -27,7 +27,7 @@ type Customer = {
 	contact_fax: string;
 };
 
-export default function Customer() {
+export default function Model() {
 	const emptyCustomer = {
 		customer_name: "",
 		customer_street: "",

@@ -79,6 +79,9 @@ const Sidebar = () => {
 				<NavItem>
 					<CustomNavLink to="/suppliers">Suppliers</CustomNavLink>
 				</NavItem>
+				<NavItem>
+					<CustomNavLink to="/models">Models</CustomNavLink>
+				</NavItem>
 			</NavMenu>
 		</SidebarContainer>
 	);

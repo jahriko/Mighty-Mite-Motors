@@ -16,6 +16,9 @@ switch ($endpoint) {
 	case 'create-customer':
 		newCustomer($conn);
 		break;
+	case 'create-order':
+		newOrder($conn);
+		break;
 	case 'create-supplier':
 		newSupplier($conn);
 		break;
@@ -56,6 +59,28 @@ function newCustomer($conn)
 	// Insert the customer
 	$stmt = $conn->prepare("INSERT INTO customer (customer_name, customer_street, customer_city, customer_state, customer_zip, contact_person, contact_phone, contact_fax) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 	$stmt->bind_param("ssssssss", $data['customer_name'], $data['customer_street'], $data['customer_city'], $data['customer_state'], $data['customer_zip'], $data['contact_phone'], $data['contact_fax']);
+
+	if ($stmt->execute()) {
+		http_response_code(200);
+		echo json_encode(array("message" => "Record inserted successfully."));
+	} else {
+		http_response_code(500);
+		echo json_encode(array("message" => "Failed to insert record."));
+	}
+
+	$stmt->close();
+}
+
+// Insert new order
+function newOrder($conn)
+{
+	// Get the posted data
+	$postData = file_get_contents("php://input");
+	$data = json_decode($postData, true);
+
+	// Insert the order
+	$stmt = $conn->prepare("INSERT INTO orders (customer_numb, order_date, order_total, order_filled) VALUES (?, ?, ?, ?)");
+	$stmt->bind_param("isii", $data['customer_numb'], $data['order_date'], $data['order_total'], $data['order_filled']);
 
 	if ($stmt->execute()) {
 		http_response_code(200);

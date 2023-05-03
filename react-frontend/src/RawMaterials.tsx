@@ -9,14 +9,9 @@ import { Dialog } from "primereact/dialog";
 import { InputNumber } from "primereact/inputnumber";
 import { InputNumberValueChangeEvent } from "primereact/inputnumber";
 import { classNames } from "primereact/utils";
-
-interface RawMaterial {
-	material_id_numb?: number;
-	material_name: string;
-	unit_of_measurement: string;
-	quantity_in_stock: number;
-	reorder_point: number;
-}
+import { useRawMaterials } from "./utils/api";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
 export default function RawMaterial() {
 	const emptyRawMaterial = {
@@ -37,10 +32,20 @@ export default function RawMaterial() {
 	const [globalFilter, setGlobalFilter] = useState<string>("");
 	const toast = useRef<Toast>(null);
 	const dt = useRef(null);
+	const { data, error} = useRawMaterials();
 
-	useEffect(() => {
-		getRawMaterials();
-	}, []);
+	const { data, error } = useQuery({
+		queryKey: ["rawMaterials"],
+		queryFn: () =>
+			axios
+				.get("http://localhost/db_final_project/api.php?endpoint=raw-materials")
+				.then((res) => res.data),
+	});
+
+	// useEffect(() => {
+	// 	const data = getRawMaterials();
+	// 	setRawMaterials(data);
+	// }, []);
 
 	const openNew = () => {
 		setRawMaterial(emptyRawMaterial);

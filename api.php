@@ -57,13 +57,45 @@ function getCustomers($conn)
 // Fetch all orders
 function getOrders($conn)
 {
-    $sql = "SELECT * FROM `order`";
+    $sql = "SELECT
+            o.order_numb,
+            o.customer_numb,
+            c.customer_name,
+            o.order_date,
+            o.order_total,
+            o.order_filled
+        FROM
+            `order` o
+        JOIN customer c ON
+            o.customer_numb = c.customer_numb";
     $result = $conn->query($sql);
     $orders = [];
     while ($row = $result->fetch_assoc()) {
-        array_push($orders, $row);
+        $orders[$row['order_numb']] = $row;
+        $orders[$row['order_numb']]['orders'] = [];
     }
-    echo json_encode($orders);
+
+    $sql = "SELECT
+                ol.order_numb,
+                ol.model_numb,
+                m.model_description,
+                ol.quantity_ordered,
+                ol.unit_price,
+                ol.line_total
+            FROM
+                order_line ol
+            JOIN model m ON
+                ol.model_numb = m.model_numb";
+    $result = $conn->query($sql);
+
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            if (isset($orders[$row['order_numb']])) {
+                $orders[$row['order_numb']]['orders'][] = $row;
+            }
+        }
+    }
+    echo json_encode(array_values($orders));
 }
 
 // Fetch all raw materials
