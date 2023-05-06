@@ -22,6 +22,9 @@ switch ($endpoint) {
 	case 'create-supplier':
 		newSupplier($conn);
 		break;
+	case 'create-line-schedule':
+		 newLineSchedule($conn);
+		 break;
 	default:
 		echo json_encode(['message' => 'Invalid API endpoint']);
 		break;
@@ -113,6 +116,26 @@ function newSupplier($conn)
 	}
 
 	$stmt->close();
+}
+
+function newLineSchedule(){
+	$postData = file_get_contents("php://input")
+	$data = json_decode($postData, true);
+
+	$stmt = $conn->prepare ("INSERT into line_schedule(line_numb, production_date, model_numb, quantity_to_product) VALUES (1,"2023-01-30", 2, 30)");
+	$stmt->bind_param ("isii", $data['line_numb'], $data['production_date'], $data['model_numb'], $data['quantity_to_product']);
+
+	if ($stmt->execute()) {
+		http_response_code(200);
+		echo json_encode(array("message" => "Record inserted successfully."));
+	} else {
+		http_response_code(500);
+		echo json_encode(array("message" => "Failed to insert record."));
+	}
+
+	$stmt->close();
+
+
 }
 
 ?>
