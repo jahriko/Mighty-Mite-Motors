@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST');
+header('Access-Control-Allow-Methods: GET, POST, DELETE');
 header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Methods, Authorization, X-Requested-With');
 
 include_once 'config.php';
@@ -43,7 +43,8 @@ function deleteRawMaterial($conn)
 	$stmt->close();
 }
 
-function deleteCustomer($conn) {
+function deleteCustomer($conn)
+{
 	// Get the posted data
 	$postData = file_get_contents("php://input");
 	$data = json_decode($postData, true);

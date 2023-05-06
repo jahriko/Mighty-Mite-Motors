@@ -98,9 +98,6 @@ export default function Orders() {
 		);
 	};
 
-	// const footer = `Order Total: ${orders order_total}`;
-
-	//create a function to get the total of the order
 	const footer = (orderTotal) => {
 		return <div className="flex justify-content-end">Order Total: {orderTotal}</div>;
 	};

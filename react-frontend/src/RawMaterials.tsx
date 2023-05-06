@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
@@ -9,11 +9,15 @@ import { Dialog } from "primereact/dialog";
 import { InputNumber } from "primereact/inputnumber";
 import { InputNumberValueChangeEvent } from "primereact/inputnumber";
 import { classNames } from "primereact/utils";
-import { useRawMaterials } from "./utils/api";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import {
+	useRawMaterials,
+	useUpdateRawMaterial,
+	RawMaterial,
+	useCreateRawMaterial,
+	useDeleteRawMaterial,
+} from "./utils/api";
 
-export default function RawMaterial() {
+export default function RawMaterials() {
 	const emptyRawMaterial = {
 		material_id_numb: 0,
 		material_name: "",
@@ -22,30 +26,59 @@ export default function RawMaterial() {
 		reorder_point: 0,
 	};
 
-	const [rawMaterials, setRawMaterials] = useState<RawMaterial[]>([]);
-	const [dialog, setDialog] = useState(false);
-	const [deleteRawMaterialDialog, setDeleteRawMaterialDialog] = useState(false);
-	const [deleteRawMaterialsDialog, setDeleteRawMaterialsDialog] = useState(false);
-	const [rawMaterial, setRawMaterial] = useState<RawMaterial>(emptyRawMaterial);
 	const [selectedRawMaterials, setSelectedRawMaterials] = useState<RawMaterial[]>([]);
-	const [submitted, setSubmitted] = useState(false);
+	const [deleteRawMaterialsDialog, setDeleteRawMaterialsDialog] = useState(false);
+	const [deleteRawMaterialDialog, setDeleteRawMaterialDialog] = useState(false);
+	const [rawMaterial, setRawMaterial] = useState<RawMaterial>(emptyRawMaterial);
+	const [rawMaterials, setRawMaterials] = useState<RawMaterial[]>([]);
 	const [globalFilter, setGlobalFilter] = useState<string>("");
+	const updateRawMaterial = useUpdateRawMaterial();
+	const createRawMaterial = useCreateRawMaterial();
+	const deleteRawMaterial = useDeleteRawMaterial();
+	const [submitted, setSubmitted] = useState(false);
+	const [dialog, setDialog] = useState(false);
+	const { data } = useRawMaterials();
 	const toast = useRef<Toast>(null);
 	const dt = useRef(null);
-	const { data, error} = useRawMaterials();
 
-	const { data, error } = useQuery({
-		queryKey: ["rawMaterials"],
-		queryFn: () =>
-			axios
-				.get("http://localhost/db_final_project/api.php?endpoint=raw-materials")
-				.then((res) => res.data),
-	});
+	const handleSuccess = (action) => {
+		setDialog(false);
+		setRawMaterial(emptyRawMaterial);
+		toast.current?.show({
+			severity: "success",
+			summary: "Successful",
+			detail: `Raw Material ${action}`,
+			life: 3000,
+		});
+	};
 
-	// useEffect(() => {
-	// 	const data = getRawMaterials();
-	// 	setRawMaterials(data);
-	// }, []);
+	const handleError = (action) => {
+		toast.current?.show({
+			severity: "error",
+			summary: "Error Message",
+			detail: `Raw Material Not ${action}`,
+			life: 3000,
+		});
+	};
+
+	const handleSubmit = () => {
+		setSubmitted(true);
+
+		// Update Raw Material
+		if (rawMaterial.material_id_numb) {
+			updateRawMaterial.mutate(rawMaterial, {
+				onSuccess: () => handleSuccess("Updated"),
+				onError: () => handleError("Updated"),
+			});
+		}
+		// Create Raw Material
+		else {
+			createRawMaterial.mutate(rawMaterial, {
+				onSuccess: () => handleSuccess("Created"),
+				onError: () => handleError("Created"),
+			});
+		}
+	};
 
 	const openNew = () => {
 		setRawMaterial(emptyRawMaterial);
@@ -71,34 +104,29 @@ export default function RawMaterial() {
 		setDialog(true);
 	};
 
-	const deleteRawMaterial = () => {
+	const handleDelete = () => {
 		const _rawMaterials = rawMaterials.filter(
 			(val) => val.material_id_numb !== rawMaterial.material_id_numb
 		);
 
 		const _rawMaterial = { ...rawMaterial };
-		console.log(_rawMaterial.material_name);
 
-		deleteRecord(_rawMaterial);
 		setRawMaterials(_rawMaterials);
+
+		deleteRawMaterial.mutate(_rawMaterial, {
+			onSuccess: () => handleSuccess("Deleted"),
+			onError: () => handleError("Deleted"),
+		});
+
 		setDeleteRawMaterialDialog(false);
 		setRawMaterial(emptyRawMaterial);
 	};
 
 	const confirmDeleteRawMaterial = (rawMaterial: RawMaterial) => {
 		setRawMaterial(rawMaterial);
+		console.log(rawMaterial);
 		setDeleteRawMaterialDialog(true);
 	};
-
-	async function getRawMaterials() {
-		const getData = fetch(
-			"http://localhost/db_final_project/api.php?endpoint=raw-materials"
-		).then((res) => res.json());
-
-		getData.then((data) => {
-			setRawMaterials(data);
-		});
-	}
 
 	const confirmDeleteSelected = () => {
 		setDeleteRawMaterialsDialog(true);
@@ -137,98 +165,6 @@ export default function RawMaterial() {
 
 		setRawMaterial(_rawMaterial);
 	};
-
-	async function createRecord(record: RawMaterial) {
-		try {
-			const res = fetch(
-				"https://localhost/db_final_project/create.php?endpoint=create-raw-material",
-				{
-					method: "POST",
-					body: JSON.stringify(record),
-				}
-			);
-			res.then((res) => {
-				if (res.status === 200) {
-					toast.current.show({
-						severity: "success",
-						summary: "Successful",
-						detail: "Record Created Successfully",
-						life: 3000,
-					});
-				} else {
-					toast.current.show({
-						severity: "error",
-						summary: "Error",
-						detail: "Record Create Error",
-						life: 3000,
-					});
-				}
-			});
-		} catch (error) {
-			console.error("Error creating record:", error);
-			alert("Failed to create record");
-		}
-	}
-
-	async function updateRecord(record: RawMaterial) {
-		try {
-			const res = await fetch(
-				"http://localhost/db_final_project/update.php?endpoint=update-raw-material",
-				{
-					method: "POST",
-					body: JSON.stringify(record),
-				}
-			);
-			if (res.status === 200) {
-				toast.current.show({
-					severity: "success",
-					summary: "Successful",
-					detail: "Record Updated Successfully",
-					life: 3000,
-				});
-			} else {
-				toast.current.show({
-					severity: "error",
-					summary: "Error",
-					detail: "Record Update Error",
-					life: 3000,
-				});
-			}
-		} catch (error) {
-			console.error("Error updating record:", error);
-			alert("Failed to update record");
-		}
-	}
-
-	async function deleteRecord(record: RawMaterial) {
-		try {
-			const res = await fetch(
-				"http://localhost/db_final_project/delete.php?endpoint=delete-raw-material",
-				{
-					method: "POST",
-					body: JSON.stringify({ material_id_numb: record.material_id_numb }),
-				}
-			);
-
-			if (res.status === 200) {
-				toast.current.show({
-					severity: "success",
-					summary: "Successful",
-					detail: "Record Deleted Successfully",
-					life: 3000,
-				});
-			} else {
-				toast.current.show({
-					severity: "error",
-					summary: "Error",
-					detail: "Record Delete Error",
-					life: 3000,
-				});
-			}
-		} catch (error) {
-			console.error("Error deleting record:", error);
-		}
-	}
 
 	const textEditor = (options) => {
 		return (
@@ -293,52 +229,10 @@ export default function RawMaterial() {
 		</div>
 	);
 
-	const saveRawMaterial = () => {
-		setSubmitted(true);
-
-		if (rawMaterial.material_name.trim()) {
-			const _rawMaterials = [...rawMaterials];
-			const _rawMaterial = { ...rawMaterial };
-
-			if (rawMaterial.material_id_numb) {
-				const index = findIndexById(rawMaterial.material_id_numb);
-
-				_rawMaterials[index] = _rawMaterial;
-				updateRecord(_rawMaterials[index]);
-			} else {
-				_rawMaterials.push(_rawMaterial);
-				createRecord(_rawMaterial);
-				toast.current.show({
-					severity: "success",
-					summary: "Successful",
-					detail: "Record Created Successfully",
-					life: 3000,
-				});
-			}
-
-			setRawMaterials(_rawMaterials);
-			setDialog(false);
-			setRawMaterial(emptyRawMaterial);
-		}
-	};
-
-	const findIndexById = (id: number) => {
-		let index = -1;
-
-		for (let i = 0; i < rawMaterials.length; i++) {
-			if (rawMaterials[i].material_id_numb === id) {
-				index = i;
-				break;
-			}
-		}
-
-		return index;
-	};
-
 	const rawMaterialDialogFooter = (
 		<>
 			<Button label="Cancel" icon="pi pi-times" outlined onClick={hideDialog} />
-			<Button label="Save" icon="pi pi-check" onClick={saveRawMaterial} />
+			<Button label="Save" icon="pi pi-check" onClick={handleSubmit} />
 		</>
 	);
 	const deleteRawMaterialDialogFooter = (
@@ -349,12 +243,7 @@ export default function RawMaterial() {
 				outlined
 				onClick={hideDeleteRawMaterialDialog}
 			/>
-			<Button
-				label="Yes"
-				icon="pi pi-check"
-				severity="danger"
-				onClick={deleteRawMaterial}
-			/>
+			<Button label="Yes" icon="pi pi-check" severity="danger" onClick={handleDelete} />
 		</>
 	);
 	const deleteRawMaterialsDialogFooter = (
@@ -386,7 +275,7 @@ export default function RawMaterial() {
 
 				<DataTable
 					ref={dt}
-					value={rawMaterials}
+					value={data}
 					selection={selectedRawMaterials}
 					onSelectionChange={handleSelectionChange}
 					dataKey="material_id_numb"
