@@ -28,6 +28,11 @@ switch ($endpoint) {
     case 'update-raw-material':
         updateRawMaterial($conn);
         break;
+
+    case 'line_schedules':
+        getLineSched($conn);
+        break;
+
     // Add more cases for each table and related API functions
     default:
         echo json_encode(['message' => 'Invalid API endpoint']);
@@ -93,6 +98,22 @@ function getSuppliers($conn)
     }
     echo json_encode($suppliers);
 }
+
+
+
+
+// Fetch all line schedule
+function getLineSched($conn)
+{
+    $sql = "SELECT * FROM line_schedule";
+    $result = $conn->query($sql);
+    $LineSched = [];
+    while ($row = $result->fetch_assoc()) {
+        array_push($LineSched, $row);
+    }
+    echo json_encode($LineSched);
+}
+
 
 // Add more functions to handle other tables and related API operations
 
