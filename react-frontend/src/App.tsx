@@ -1,9 +1,10 @@
-import { BrowserRouter as Router, Route, Routes, NavLink, Link } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import RawMaterials from "./RawMaterials";
 import Customers from "./Customers";
 import Orders from "./Orders";
 import Models from "./Models";
+import Suppliers from "./Suppliers";
 
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
@@ -13,7 +14,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./Login.css";
 
 const Dashboard = () => <div>Dashboard</div>;
-const Suppliers = () => <div>Suppliers</div>;
 
 const App = () => {
 	return (

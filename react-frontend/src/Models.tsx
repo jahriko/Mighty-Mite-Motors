@@ -1,44 +1,45 @@
-import { DataTableExpandedRows } from "primereact/datatable";
-import { useState, useRef, useEffect } from "react";
+import { DataTable, DataTableExpandedRows } from "primereact/datatable";
+import { useState, useRef  } from "react";
 import { Toast } from "primereact/toast";
+import { Model, useModels } from "./utils/api";
+import { Column } from "primereact/column";
 
-type Model = {
-	model_numb: number;
-	model_description: string;
-	suggested_retail_price: number;
-	shipping_weight: number;
-	time_to_manufacture: number;
-};
-
-export default Models() {
+export default function Models() {
 	const [models, setModels] = useState<Model[]>([]);
 	const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows>(null);
 	const toast = useRef<Toast>(null);
+	const { data } = useModels();
 
-	useEffect(() => {
-		fetch("http://localhost/db_final_project/api.php?endpoint=models")
-			.then((res) => res.json())
-			.then((data) => setModels(data));
-	}, []);
+	const allowExpansion = (rowData: Model) => {
+		return rowData.materials.length > 0;
+	};
 
+	const rowExpansionTemplate = (rowData: Model) => {
+		return (
+			<div className="p-3">
+				<DataTable value={rowData.materials} dataKey="material_id_numb">
+					<Column field="material_name" header="Material" sortable />
+					<Column field="quantity_needed" header="Quantity Needed" sortable />
+				</DataTable>
+			</div>
+		);
+	};
+
+	return (
+		<div>
+			<Toast ref={toast} />
+			<DataTable
+				value={data}
+				expandedRows={expandedRows}
+				onRowToggle={(e) => setExpandedRows(e.data)}
+				rowExpansionTemplate={rowExpansionTemplate}
+				dataKey="model_numb"
+			>
+				<Column expander={allowExpansion} style={{ width: "5rem" }} />
+				<Column field="model_description" header="Model" sortable />
+				<Column field="suggested_retail_price" header="SRP" sortable />
+				<Column field="time_to_manufacture" header="Time to Manufacture" sortable />
+			</DataTable>
+		</div>
+	);
 }
-
-// [{
-// 	model_numb: "1",
-// 	model_description: "Model A",
-// 	suggested_retail_price: "999.99",
-// 	time_to_manufacture: "01:00:00",
-// 	materials: [
-// 		{		
-// 			material_name: "Metal Alloy",
-// 			material_id_numb: "1",
-// 			quantity_needed: "5",
-// 		},
-// 		{		
-// 			material_name: "Rubber",
-// 			material_id_numb: "4",
-// 			quantity_needed: "1",
-// 		},
-// 	]
-
-// }]

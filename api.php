@@ -33,13 +33,46 @@ switch ($endpoint) {
 // Fetch all models
 function getModels($conn)
 {
-    $sql = "SELECT * FROM model";
+    $sql = "SELECT
+                m.model_numb,
+                m.model_description,
+                m.suggested_retail_price,
+                m.time_to_manufacture,
+                rm.material_name,
+                mn.material_id_numb,
+                mn.quantity_needed
+            FROM
+                model m
+            JOIN material_needed mn ON
+                mn.model_numb = m.model_numb
+            JOIN raw_material rm ON
+                rm.material_id_numb = mn.material_id_numb";
     $result = $conn->query($sql);
     $models = [];
-    while ($row = $result->fetch_assoc()) {
-        array_push($models, $row);
+
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $model_numb = $row["model_numb"];
+
+            if (!isset($models[$model_numb])) {
+                $models[$model_numb] = [
+                    "model_numb" => $model_numb,
+                    "model_description" => $row["model_description"],
+                    "suggested_retail_price" => $row["suggested_retail_price"],
+                    "time_to_manufacture" => $row["time_to_manufacture"],
+                    "materials" => []
+                ];
+            }
+
+            $models[$model_numb]["materials"][] = [
+                "material_name" => $row["material_name"],
+                "material_id_numb" => $row["material_id_numb"],
+                "quantity_needed" => $row["quantity_needed"]
+            ];
+        }
     }
-    echo json_encode($models);
+
+    echo json_encode(array_values($models));
 }
 
 // Fetch all customers

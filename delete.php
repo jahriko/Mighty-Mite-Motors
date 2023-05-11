@@ -16,6 +16,9 @@ switch ($endpoint) {
 	case 'delete-customer':
 		deleteCustomer($conn);
 		break;
+	case 'delete-order':
+		deleteOrder($conn);
+		break;
 	default:
 		echo json_encode(['message' => 'Invalid API endpoint']);
 		break;
@@ -52,6 +55,27 @@ function deleteCustomer($conn)
 	// Delete the customer
 	$stmt = $conn->prepare("DELETE FROM customer WHERE customer_numb=?");
 	$stmt->bind_param("i", $data['customer_numb']);
+
+	if ($stmt->execute()) {
+		http_response_code(200);
+		echo json_encode(array("message" => "Record deleted successfully."));
+	} else {
+		http_response_code(500);
+		echo json_encode(array("message" => "Failed to delete record."));
+	}
+
+	$stmt->close();
+}
+
+function deleteOrder($conn)
+{
+	// Get the posted data
+	$postData = file_get_contents("php://input");
+	$data = json_decode($postData, true);
+
+	// Delete the order
+	$stmt = $conn->prepare("DELETE FROM orders WHERE order_numb=?");
+	$stmt->bind_param("i", $data['order_numb']);
 
 	if ($stmt->execute()) {
 		http_response_code(200);

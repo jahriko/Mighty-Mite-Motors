@@ -20,6 +20,9 @@ switch ($endpoint) {
 	case 'update-order':
 		updateOrder($conn);
 		break;
+	case 'update-supplier';
+		updateSupplier($conn);
+		break;
 	default:
 		echo json_encode(['message' => 'Invalid API endpoint']);
 		break;
@@ -164,6 +167,57 @@ function updateOrder($conn)
 		echo json_encode(['message' => 'Order record updated successfully']);
 	} else {
 		echo json_encode(['message' => 'Failed to update order record']);
+	}
+
+	$stmt->close();
+}
+
+// Update the supplier
+function updateSupplier($conn)
+{
+	$data = json_decode(file_get_contents("php://input"));
+
+	// Validate the input data
+	if (
+		!isset($data->supplier_numb)
+		|| !isset($data->supplier_name)
+		|| !isset($data->supplier_street)
+		|| !isset($data->supplier_city)
+		|| !isset($data->supplier_state)
+		|| !isset($data->supplier_zip)
+		|| !isset($data->supplier_phone)
+	) {
+		echo json_encode(['message' => 'Invalid input data']);
+		return;
+	}
+
+	// Prepare an SQL statement to update the record
+	$stmt = $conn->prepare(
+		"UPDATE supplier 
+		 SET supplier_name=?, 
+		 		 supplier_street=?, 
+				 supplier_city=?, 
+				 supplier_state=?, 
+				 supplier_zip=?, 
+				 supplier_phone=?, 
+		 WHERE supplier_numb=?"
+	);
+	$stmt->bind_param(
+		"sssssssi",
+		$data->supplier_name,
+		$data->supplier_street,
+		$data->supplier_city,
+		$data->supplier_state,
+		$data->supplier_zip,
+		$data->contact_person,
+		$data->supplier_phone,
+		$data->supplier_numb,
+	);
+
+	if ($stmt->execute()) {
+		echo json_encode(['message' => 'Supplier record updated successfully']);
+	} else {
+		echo json_encode(['message' => 'Failed to update supplier record']);
 	}
 
 	$stmt->close();
